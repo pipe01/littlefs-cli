@@ -28,7 +28,7 @@ var Cat *ffcli.Command = &ffcli.Command{
 			return fmt.Errorf("littefs path required")
 		}
 
-		return lfs.WithReadOnly(file, blockSize, blocks, func(fs *littlefs.LFS) error {
+		return lfs.WithReadOnly(file, start, blockSize, blocks, func(fs *littlefs.LFS) error {
 			stat, err := fs.Stat(file.VolumePath)
 			if err != nil {
 				return err

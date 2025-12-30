@@ -12,12 +12,12 @@ type Device interface {
 	Close() error
 }
 
-func Open(path string, defaultBlockSize, defaultBlockCount int64) (Device, error) {
+func Open(path string, start, defaultBlockSize, defaultBlockCount int64) (Device, error) {
 	// TODO: better detection, cross platform
 	if strings.HasPrefix(path, "/dev/") {
 		return OpenHardwareDevice(path)
 	}
-	return OpenFileDevice(path, defaultBlockSize, defaultBlockCount)
+	return OpenFileDevice(path, start, defaultBlockSize, defaultBlockCount)
 }
 
 func Create(path string, blockSize, blockCount int64) (Device, error) {

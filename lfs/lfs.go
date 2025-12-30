@@ -17,8 +17,8 @@ type Config struct {
 
 // Open a filesystem and file on it
 // Caller is responsible for calling Close() and Unmount() on returned values
-func OpenPath(file path.Path, flag int, blockSize, blockCount int64) (block.Device, *littlefs.LFS, tinyfs.File, error) {
-	bd, lfs, err := Open(file.Path, flag&os.O_RDWR, blockSize, blockCount)
+func OpenPath(file path.Path, flag int, start, blockSize, blockCount int64) (block.Device, *littlefs.LFS, tinyfs.File, error) {
+	bd, lfs, err := Open(file.Path, flag&os.O_RDWR, start, blockSize, blockCount)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -35,8 +35,8 @@ func OpenPath(file path.Path, flag int, blockSize, blockCount int64) (block.Devi
 
 // Open a filesystem
 // Caller is responsible for calling Close() and Unmount() on returned values
-func Open(file string, flag int, defaultBlockSize, defaultBlockCount int64) (block.Device, *littlefs.LFS, error) {
-	bd, err := block.Open(file, defaultBlockSize, defaultBlockCount)
+func Open(file string, flag int, start, defaultBlockSize, defaultBlockCount int64) (block.Device, *littlefs.LFS, error) {
+	bd, err := block.Open(file, start, defaultBlockSize, defaultBlockCount)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -88,16 +88,16 @@ func Create(file string, defaultBlockSize, defaultBlockCount int64) error {
 
 type WithLFSFunc func(*littlefs.LFS) error
 
-func WithReadOnly(file path.Path, defaultBlockSize, defaultBlockCount int64, cb WithLFSFunc) error {
-	return with(os.O_RDONLY, file, defaultBlockSize, defaultBlockCount, cb)
+func WithReadOnly(file path.Path, start, defaultBlockSize, defaultBlockCount int64, cb WithLFSFunc) error {
+	return with(os.O_RDONLY, file, start, defaultBlockSize, defaultBlockCount, cb)
 }
 
-func WithReadWrite(file path.Path, defaultBlockSize, defaultBlockCount int64, cb WithLFSFunc) error {
-	return with(os.O_RDWR, file, defaultBlockSize, defaultBlockCount, cb)
+func WithReadWrite(file path.Path, start, defaultBlockSize, defaultBlockCount int64, cb WithLFSFunc) error {
+	return with(os.O_RDWR, file, start, defaultBlockSize, defaultBlockCount, cb)
 }
 
-func with(flag int, file path.Path, defaultBlockSize, defaultBlockCount int64, cb func(*littlefs.LFS) error) error {
-	f, lfs, err := Open(file.Path, flag, defaultBlockSize, defaultBlockCount)
+func with(flag int, file path.Path, start, defaultBlockSize, defaultBlockCount int64, cb func(*littlefs.LFS) error) error {
+	f, lfs, err := Open(file.Path, flag, start, defaultBlockSize, defaultBlockCount)
 	if err != nil {
 		return err
 	}

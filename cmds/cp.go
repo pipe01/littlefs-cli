@@ -44,7 +44,7 @@ func cp(sourceFile, targetFile path.Path) error {
 
 		source = f
 	} else {
-		volume, lFS, f, err := lfs.OpenPath(sourceFile, os.O_RDONLY, blockSize, blocks)
+		volume, lFS, f, err := lfs.OpenPath(sourceFile, os.O_RDONLY, start, blockSize, blocks)
 		if err != nil {
 			return err
 		}
@@ -64,7 +64,7 @@ func cp(sourceFile, targetFile path.Path) error {
 
 		sink = f
 	} else {
-		volume, lFS, f, err := lfs.OpenPath(targetFile, os.O_RDWR|os.O_CREATE, blockSize, blocks)
+		volume, lFS, f, err := lfs.OpenPath(targetFile, os.O_RDWR|os.O_CREATE, start, blockSize, blocks)
 		if err != nil {
 			return err
 		}

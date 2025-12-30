@@ -23,7 +23,7 @@ var List *ffcli.Command = &ffcli.Command{
 
 		file := path.Parse(args[0])
 
-		return lfs.WithReadOnly(file, blockSize, blocks, func(fs *littlefs.LFS) error {
+		return lfs.WithReadOnly(file, start, blockSize, blocks, func(fs *littlefs.LFS) error {
 			lfsPath := file.VolumePath
 			if lfsPath == "" {
 				lfsPath = "/"

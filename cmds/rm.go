@@ -28,7 +28,7 @@ func rm(file path.Path) error {
 	if file.VolumePath == "" {
 		return os.Remove(file.Path)
 	}
-	return lfs.WithReadWrite(file, blockSize, blocks, func(fs *littlefs.LFS) error {
+	return lfs.WithReadWrite(file, start, blockSize, blocks, func(fs *littlefs.LFS) error {
 		return fs.Remove(file.VolumePath)
 	})
 }

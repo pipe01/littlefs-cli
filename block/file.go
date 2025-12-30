@@ -39,7 +39,7 @@ func CreateFileDevice(path string, blockSize, blockCount int64) (*FileDevice, er
 	}, nil
 }
 
-func OpenFileDevice(path string, blockSize, blockCount int64) (*FileDevice, error) {
+func OpenFileDevice(path string, start, blockSize, blockCount int64) (*FileDevice, error) {
 	f, err := os.OpenFile(path, os.O_RDWR, 0) // TODO: optional read only mode
 	if err != nil {
 		return nil, err
@@ -56,15 +56,18 @@ func OpenFileDevice(path string, blockSize, blockCount int64) (*FileDevice, erro
 			f.Close()
 			return nil, err
 		}
-		if fstat.Size()%blockSize != 0 {
+		size := fstat.Size() - start
+
+		if size%blockSize != 0 {
 			f.Close()
-			return nil, fmt.Errorf("file size %d is not a multiple of block size %d", fstat.Size(), blockSize)
+			return nil, fmt.Errorf("file size %d is not a multiple of block size %d", size, blockSize)
 		}
-		blockCount = fstat.Size() / blockSize
+		blockCount = size / blockSize
 	}
 
 	return &FileDevice{
 		file:      f,
+		start:     start,
 		blockSize: blockSize,
 		blocks:    blockCount,
 	}, nil
@@ -72,6 +75,7 @@ func OpenFileDevice(path string, blockSize, blockCount int64) (*FileDevice, erro
 
 type FileDevice struct {
 	file      *os.File
+	start     int64
 	blockSize int64
 	blocks    int64
 }
@@ -93,14 +97,14 @@ func (bd *FileDevice) EraseBlockSize() int64 {
 }
 
 func (bd *FileDevice) EraseBlocks(start, count int64) error {
-	_, err := bd.file.WriteAt(make([]byte, 0, (start+count*bd.blockSize-1)), start*bd.blockSize)
+	_, err := bd.file.WriteAt(make([]byte, 0, (start+count*bd.blockSize-1)), bd.start+start*bd.blockSize)
 	return err
 }
 
 func (bd *FileDevice) ReadAt(p []byte, off int64) (n int, err error) {
-	return bd.file.ReadAt(p, off)
+	return bd.file.ReadAt(p, bd.start+off)
 }
 
 func (bd *FileDevice) WriteAt(p []byte, off int64) (n int, err error) {
-	return bd.file.WriteAt(p, off)
+	return bd.file.WriteAt(p, bd.start+off)
 }
